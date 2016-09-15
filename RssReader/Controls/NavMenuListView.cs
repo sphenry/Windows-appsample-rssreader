@@ -113,11 +113,11 @@ namespace RssReader.Controls
                 var lvi = (ListViewItem)this.ContainerFromIndex(i);
                 if (i != index)
                 {
-                    lvi.IsSelected = false;
+                    if (lvi != null) lvi.IsSelected = false;
                 }
                 else if (i == index)
                 {
-                    lvi.IsSelected = true;
+                    if (lvi != null) lvi.IsSelected = true;
                 }
             }
         }

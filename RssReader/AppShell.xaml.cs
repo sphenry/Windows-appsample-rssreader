@@ -61,6 +61,13 @@ namespace RssReader
                 Label = "Edit feeds",
                 DestPage = typeof(MasterDetailPage),
                 Arguments = typeof(EditFeedsView)
+            },
+            new NavMenuItem()
+            {
+                Symbol = Symbol.Upload,
+                Label = "Hand over",
+                DestPage = typeof(MasterDetailPage),
+                Arguments = typeof(RemoteSystemsView)
             }
         });
 

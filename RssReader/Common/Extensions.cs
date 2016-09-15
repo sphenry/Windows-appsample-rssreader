@@ -53,10 +53,12 @@ namespace RssReader.Common
         public static async Task<bool> LaunchBrowserForNonMatchingUriAsync(
             this Uri uriToMatch, WebViewNavigationStartingEventArgs e)
         {
-            if (e.Uri.WithoutScheme() == uriToMatch.WithoutScheme()) return false;
-            e.Cancel = true;
-            await Launcher.LaunchUriAsync(e.Uri);
-            return true;
+            return false;
+
+            //if (e.Uri.WithoutScheme() == uriToMatch.WithoutScheme()) return false;
+            //e.Cancel = true;
+            //await Launcher.LaunchUriAsync(e.Uri);
+            //return true;
         }
     }
 }

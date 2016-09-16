@@ -30,6 +30,7 @@ using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
 namespace RssReader
@@ -56,10 +57,15 @@ namespace RssReader
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
+            Launch(e.Arguments);
+        }
+
+        private void Launch(string launchArgs)
+        {
             ApplicationViewTitleBar titleBar = ApplicationView.GetForCurrentView().TitleBar;
             if (titleBar != null)
             {
-                Color titleBarColor = (Color)App.Current.Resources["SystemChromeMediumColor"];
+                Color titleBarColor = (Color) App.Current.Resources["SystemChromeMediumColor"];
                 titleBar.BackgroundColor = titleBarColor;
                 titleBar.ButtonBackgroundColor = titleBarColor;
             }
@@ -78,10 +84,6 @@ namespace RssReader
 
                 shell.AppFrame.NavigationFailed += OnNavigationFailed;
 
-                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
-                {
-                    //TODO: Load state from previously suspended application
-                }
             }
 
             // Place our app shell in the current Window
@@ -91,13 +93,37 @@ namespace RssReader
             {
                 // When the navigation stack isn't restored, navigate to the first page
                 // suppressing the initial entrance animation.
-                shell.AppFrame.Navigate(typeof(MasterDetailPage), e.Arguments, new Windows.UI.Xaml.Media.Animation.SuppressNavigationTransitionInfo());
+                shell.AppFrame.Navigate(typeof(MasterDetailPage), launchArgs,
+                    new Windows.UI.Xaml.Media.Animation.SuppressNavigationTransitionInfo());
+            }
+            else
+            {
+                shell.AppFrame.Navigate(typeof(MasterDetailPage), new Uri(launchArgs));
             }
 
             // Ensure the current window is active
             Window.Current.Activate();
 
             ApplicationView.GetForCurrentView().SetPreferredMinSize(new Size(320, 200));
+        }
+
+        protected override void OnActivated(IActivatedEventArgs e)
+        {
+            if (e.Kind == ActivationKind.Protocol)
+            {
+                var uriArgs = e as ProtocolActivatedEventArgs;
+
+                if (uriArgs != null)
+                {
+                    var decoder = new WwwFormUrlDecoder(uriArgs.Uri.Query);
+
+                    var feedUriString = Uri.UnescapeDataString(decoder.GetFirstValueByName("feed"));
+
+                    Launch(feedUriString);
+
+                }
+
+            }
         }
 
         /// <summary>

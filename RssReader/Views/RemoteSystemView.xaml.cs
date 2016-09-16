@@ -61,7 +61,7 @@ namespace RssReader.Views
 
         #endregion
         private RemoteSystemWatcher _remoteSystemWatcher;
-
+        private bool _useBrowser = true;
 
         private MainViewModel ViewModel => AppShell.Current.ViewModel;
         public ObservableCollection<RemoteSystem> DeviceList { get; } = new ObservableCollection<RemoteSystem>();
@@ -111,9 +111,28 @@ namespace RssReader.Views
         {
             var selectedRemoteSystem = RemoteSystemList.SelectedItem as RemoteSystem;
             var uri = ViewModel.CurrentArticle.Link;
+            if (_useBrowser)
+            {
+                var launchUriStatus = await RemoteLauncher.LaunchUriAsync(new RemoteSystemConnectionRequest(selectedRemoteSystem), uri);
 
-            var launchUriStatus = await RemoteLauncher.LaunchUriAsync(new RemoteSystemConnectionRequest(selectedRemoteSystem), uri);
+            }
+            else
+            {
+                //package state into Uri
+                var currentFeedEscaped = Uri.EscapeUriString(ViewModel.CurrentFeed.Link.ToString());
+                var currentArticleEscaped = Uri.EscapeUriString(ViewModel.CurrentArticle.Link.ToString());
 
+                var uriString = "windows-rssreader:read?feed=" + currentFeedEscaped + "&article=" + currentArticleEscaped ;
+
+                var launchUriStatus = await RemoteLauncher.LaunchUriAsync(new RemoteSystemConnectionRequest(selectedRemoteSystem), new Uri(uriString));
+
+            }
+
+        }
+
+        private void LaunchTypeComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }

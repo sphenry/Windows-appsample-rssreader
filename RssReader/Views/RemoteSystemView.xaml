@@ -33,6 +33,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:remoteSystems="using:Windows.System.RemoteSystems"
+      xmlns:system="using:System"
       mc:Ignorable="d">
 
     <Page.Resources>
@@ -86,7 +87,17 @@
                    ItemTemplate="{StaticResource EditFeedsListItemTemplate}"
                    ItemContainerStyle="{StaticResource ListViewItemEditFeed}"
                       SelectionChanged="RemoteSystemList_OnSelectionChanged"/>
-          
+
+
+            <ComboBox x:Name="LaunchTypeComboBox" 
+                      Grid.Row="3" Width="160"
+                      Margin="24,12,24,0"
+                      SelectionChanged="LaunchTypeComboBox_OnSelectionChanged"
+                      VerticalAlignment="Bottom">
+                <x:String>Open in browser</x:String>
+                <!--<x:String>Open in app</x:String>-->
+            </ComboBox>
+
 
         </Grid>
     </Grid>

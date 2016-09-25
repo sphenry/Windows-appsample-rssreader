@@ -53,10 +53,11 @@ namespace RssReader.Views
         {
             // Raise PropertyChanged even if the clicked article is already current. This ensures 
             // that clicking an article in master-only view will always navigate to details-only view. 
-            if (ViewModel.CurrentArticle.Equals(e.ClickedItem as ArticleViewModel))
-            {
-                ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentArticle));
-            }
+            //NOTE: results in double navigation on Phone, at least
+            //if (ViewModel.CurrentArticle.Equals(e.ClickedItem as ArticleViewModel))
+            //{
+            //    ViewModel.OnPropertyChanged(nameof(ViewModel.CurrentArticle));
+            //}
         }
 
         private void ToggleButton_Toggled(object sender, RoutedEventArgs e)

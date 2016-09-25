@@ -26,6 +26,7 @@ using RssReader.Common;
 using RssReader.ViewModels;
 using System;
 using System.Linq;
+using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
@@ -66,28 +67,38 @@ namespace RssReader.Views
         {
             // Set a flag so that, in narrow mode, details-only navigation doesn't occur if 
             // the CurrentArticle is changed solely as a side-effect of changing the CurrentFeed.
-            if (e.PropertyName == nameof(ViewModel.CurrentFeed)) isCurrentFeedNew = true;
+            if (e.PropertyName == nameof(ViewModel.CurrentFeed))
+                isCurrentFeedNew = true;
             else if (e.PropertyName == nameof(ViewModel.CurrentArticle))
             {
-                if (ViewModel.CurrentArticle != null)
+                var isRemoteArticleView = RemoteSystemsView.UseRemoteSystemView;
+                if (isRemoteArticleView == true)
                 {
-                    ArticleWebView.Navigate(ViewModel.CurrentArticle.Link);
+                    RemoteSystemsView.LaunchArticleOnSelectedRemoteSystem(ViewModel.CurrentFeed.Link, ViewModel.CurrentArticle.Link);
                 }
                 else
                 {
-                    ArticleWebView.NavigateToString(string.Empty);
-                }
-
-                if (AdaptiveStates.CurrentState == NarrowState)
-                {
-                    bool switchToDetailsView = !isCurrentFeedNew;
-                    isCurrentFeedNew = false;
-                    if (switchToDetailsView)
+                    if (ViewModel.CurrentArticle != null)
                     {
-                        // Use "drill in" transition for navigating from master list to detail view
-                        Frame.Navigate(typeof(DetailPage), null, new DrillInNavigationTransitionInfo());
+                        ArticleWebView.Navigate(ViewModel.CurrentArticle.Link);
+                    }
+                    else
+                    {
+                        ArticleWebView.NavigateToString(string.Empty);
+                    }
+
+                    if (AdaptiveStates.CurrentState == NarrowState)
+                    {
+                        bool switchToDetailsView = !isCurrentFeedNew;
+                        isCurrentFeedNew = false;
+                        if (switchToDetailsView)
+                        {
+                            // Use "drill in" transition for navigating from master list to detail view
+                            Frame.Navigate(typeof(DetailPage), null, new DrillInNavigationTransitionInfo());
+                        }
                     }
                 }
+
             }
         }
 
@@ -104,7 +115,20 @@ namespace RssReader.Views
                 }
 
                 var feedUri = e.Parameter as Uri;
-                if (feedUri != null)
+                if (feedUri != null && feedUri.Scheme == "windows-rssreader")
+                {
+                    var decoder = new WwwFormUrlDecoder(feedUri.Query);
+
+                    var feedUriString = Uri.UnescapeDataString(decoder.GetFirstValueByName("feed"));
+                    var articleUriString = Uri.UnescapeDataString(decoder.GetFirstValueByName("article"));
+                    
+                    var feed = ViewModel.Feeds.FirstOrDefault(f => f.Link == new Uri(feedUriString));
+                    ViewModel.CurrentFeed = feed;
+                    await feed.RefreshAsync();
+
+                    ViewModel.CurrentArticle = feed.Articles.FirstOrDefault(a => a.Link == new Uri(articleUriString));
+                }
+                else if (feedUri != null)
                 {
                     var feed = ViewModel.Feeds.FirstOrDefault(f => f.Link == feedUri);
                     ViewModel.CurrentFeed = feed;

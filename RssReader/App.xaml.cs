@@ -99,6 +99,7 @@ namespace RssReader
             else
             {
                 shell.AppFrame.Navigate(typeof(MasterDetailPage), new Uri(launchArgs));
+                shell.NavigateToCurrentFeed();
             }
 
             // Ensure the current window is active
@@ -115,12 +116,7 @@ namespace RssReader
 
                 if (uriArgs != null)
                 {
-                    var decoder = new WwwFormUrlDecoder(uriArgs.Uri.Query);
-
-                    var feedUriString = Uri.UnescapeDataString(decoder.GetFirstValueByName("feed"));
-
-                    Launch(feedUriString);
-
+                    Launch(uriArgs.Uri.ToString());
                 }
 
             }

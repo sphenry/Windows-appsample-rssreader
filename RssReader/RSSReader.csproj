@@ -111,6 +111,7 @@
       <DependentUpon>AppShell.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\FeedViewModel.cs" />
+    <Compile Include="ViewModels\RemoteSystemController.cs" />
     <Compile Include="Views\AddFeedView.xaml.cs">
       <DependentUpon>AddFeedView.xaml</DependentUpon>
     </Compile>

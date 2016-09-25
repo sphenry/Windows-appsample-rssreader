@@ -61,7 +61,7 @@ namespace RssReader.Views
 
         #endregion
         private RemoteSystemWatcher _remoteSystemWatcher;
-        private bool _useBrowser = true;
+        private static bool _useBrowser = false;
 
         private MainViewModel ViewModel => AppShell.Current.ViewModel;
         public ObservableCollection<RemoteSystem> DeviceList { get; } = new ObservableCollection<RemoteSystem>();
@@ -69,6 +69,8 @@ namespace RssReader.Views
         public RemoteSystemsView()
         {
             this.InitializeComponent();
+            LaunchTypeComboBox.SelectedIndex = 0;
+
             DiscoverDevices();
         }
 
@@ -77,6 +79,10 @@ namespace RssReader.Views
             base.OnNavigatedTo(e);
             
         }
+
+        private static RemoteSystem _selectedRemoteSystem = null;
+
+        public static bool UseRemoteSystemView => _selectedRemoteSystem != null;
 
         private async void DiscoverDevices()
         {
@@ -109,30 +115,29 @@ namespace RssReader.Views
 
         private async void RemoteSystemList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selectedRemoteSystem = RemoteSystemList.SelectedItem as RemoteSystem;
+            _selectedRemoteSystem = RemoteSystemList.SelectedItem as RemoteSystem;
             var uri = ViewModel.CurrentArticle.Link;
+            
+            //LaunchUriOnSelectedRemoteSystem(uri);
+
+        }
+
+        public static async void LaunchArticleOnSelectedRemoteSystem(Uri feedLink, Uri articleLink)
+        {
             if (_useBrowser)
             {
-                var launchUriStatus = await RemoteLauncher.LaunchUriAsync(new RemoteSystemConnectionRequest(selectedRemoteSystem), uri);
-
+                await RemoteSystemController.LaunchUriOnRemoteSystemAsync(articleLink, _selectedRemoteSystem);
             }
             else
             {
                 //package state into Uri
-                var currentFeedEscaped = Uri.EscapeUriString(ViewModel.CurrentFeed.Link.ToString());
-                var currentArticleEscaped = Uri.EscapeUriString(ViewModel.CurrentArticle.Link.ToString());
-
-                var uriString = "windows-rssreader:read?feed=" + currentFeedEscaped + "&article=" + currentArticleEscaped ;
-
-                var launchUriStatus = await RemoteLauncher.LaunchUriAsync(new RemoteSystemConnectionRequest(selectedRemoteSystem), new Uri(uriString));
-
+                await RemoteSystemController.LaunchUriVerbRemoteSystemAsync(_selectedRemoteSystem, "read", "feed", feedLink.ToString(), "article", articleLink.ToString());
             }
-
         }
 
         private void LaunchTypeComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            throw new NotImplementedException();
+            _useBrowser = LaunchTypeComboBox.SelectedIndex == 0;
         }
     }
 }
